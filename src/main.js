@@ -1,7 +1,28 @@
 // Код логіки слайдера пишемо тут
 
-const slides = document.querySelectorAll('.slide');
-let currentSlide = 0;
+const container = document.querySelector('#carousel'); // Контейнер слайдера
+const slidesContainer = container.querySelector('#slides-container'); // Контейнер для слайдів
+const slides = container.querySelectorAll('.slide');
+const indicatorsContainer = container.querySelector('#indicators-container'); // Контейнер для індикаторів
+const indicators = container.querySelectorAll('.indicator'); // Індикатори слайдів
+let next = container.querySelector('#next-btn');
+let previous = container.querySelector('#prev-btn');
+let pauseButton = container.querySelector('#pause-btn');
+
+const SLIDES_COUNT = 5; // Кількість слайдів
+const CODE_ARROW_LEFT = 37; // Код клавіші "вліво"
+const CODE_ARROW_RIGHT = 39; // Код клавіші "вправо"
+const CODE_SPACE = 32; // Код клавіші "пробіл"
+const FA_PAUSE = '<i class="fas fa-pause"></i>'; // Іконка паузи
+const FA_PLAY = '<i class="fas fa-play"></i>'; // Іконка відтворення
+const TIMER_INTERVAL = 2000; // Інтервал зміни слайдів
+
+let currentSlide = 0; // Поточний слайд
+let isPlaying = true; // Статус відтворення слайд-шоу
+let timerId = null; // Таймер для автоматичної зміни слайдів
+let swipeStartX = null; // Початкова позиція свайпу
+let swipeEndX = null; // Кінцева позиція свайпу
+
 let slideInterval = setInterval(nextSlide, 3000);
 
 function nextSlide() {
@@ -13,14 +34,13 @@ function previousSlide() {
 }
     
 function goToSlide(n) {
-    slides[currentSlide].className = 'slide';
-    currentSlide = (n + slides.length) % slides.length;
-    slides[currentSlide].className = 'slide active';
+    slides[currentSlide].classList.toggle('active');
+    indicators[currentSlide].classList.toggle('active');
+    currentSlide = (n + SLIDES_COUNT) % SLIDES_COUNT;
+    slides[currentSlide].classList.toggle('active');
+    indicators[currentSlide].classList.toggle('active');
 }
 
-
-let isPlaying = true;
-let pauseButton = document.querySelector('#pause-btn');
 
 function pauseSlideShow() {
     pauseButton.innerHTML = 'Play';
@@ -39,8 +59,16 @@ pauseButton.onclick = function () {
     else playSlideShow();
 };
 
-let next = document.querySelector('#next-btn');
-let previous = document.querySelector('#prev-btn');
+function indicatorsClickHandler(event) {
+    const { target } = event;
+    if (target && target.classList.contains('indicator')) {
+        console.log('Indicator clicked:', target);
+        pauseSlideShow();
+        goToSlide(+target.getAttribute('data-slide-to'));
+    }
+}
+
+
 
 next.onclick = function () {
 pauseSlideShow();
@@ -51,3 +79,5 @@ previous.onclick = function () {
 pauseSlideShow();
 previousSlide();
 };
+
+indicatorsContainer.addEventListener('click', indicatorsClickHandler);
